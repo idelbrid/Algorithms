@@ -1,0 +1,24 @@
+Ian Delbridge
+CSC 284
+Stefankovic
+02-10-16
+
+*********************** File Descriptions *************
+* dnf_sat.py: python code for the implemented probabilistic algorithm to count the number of satisfying assignments to a DNF formula. 
+
+* README: this file
+
+* test_in: file used to test the program as in the example
+
+* writeup.pdf: pdf of my writeup for this assignment 
+
+
+********************** How to Run ************************
+On a unix machine run
+cat {TEST_FILE_HERE} | python dnf_sat.py
+
+
+********************** Sample Output *********************
+[idelbrid@colden dnf_sat]$ cat test_in | python dnf_sat.py
+2.0
+

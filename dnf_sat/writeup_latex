@@ -1,0 +1,114 @@
+% --------------------------------------------------------------
+% This is all preamble stuff that you don't have to worry about.
+% Head down to where it says "Start here"
+% --------------------------------------------------------------
+
+\documentclass[12pt]{article}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb,mathrsfs}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\T}{\mathscr{T}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\V}{\text{V}}
+
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries
+    #2.}]}{\end{trivlist}}
+\newenvironment{answer}[1][Answer]
+	{\begin{trivlist} \item[\hskip \labelsep {\bfseries #1.}]}
+	{\end{trivlist}}
+\newenvironment{claim}[1][Claim]
+	{\begin{trivlist} \item[\hskip \labelsep {\bfseries #1.}]}
+	{\end{trivlist}}
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother	
+
+\begin{document}
+
+% --------------------------------------------------------------
+%                         Start here
+% --------------------------------------------------------------
+
+
+\title{Homework 2: Applied Part Write-up}%replace X with the appropriate number
+\author{Ian Delbridge\\ %replace with your name
+CSC 284: Advanced Algorithms\\
+Stefankovic} %if necessary, replace with your course title
+
+\maketitle
+The goal was, given a DNF formula $F$, to probabilistically calculate the number of satisfying assignments, $k$, to $F$. In this discussion, $n$ is the number of variables and $m$ is the number of clauses in the DNF formula. We perform this approximation by sampling the space $\Omega$ of all pairs $(i, \sigma)$ where $i \in  \{1, ..., m\}$ and $\sigma$ satisfies the $i$th clause. We consider a subset $\Omega ^\prime \subset \Omega$ that has the same cardinality of the set of satisfying assignments. 
+\\
+
+For each sample, we test to see if clause $i$ is the lowest number such that $\sigma$ is a satisfying assignment. If so, then we have found the unique identifier of the satisfying assignment $\sigma$. Otherwise, this sample is a part of $\Omega$ but not part of the (repetition-less) set of satisfying assignments. 
+\\
+
+We count the number of samples $t$ in $\Omega ^\prime$ and the total number of samples, $s$. Then the approximate number of assignments is 
+\begin{align}
+\frac{t}{s} \approx& \frac{|\Omega ^\prime |}{|\Omega|} \\
+					=& \frac{k}{|\Omega|} \\
+                    \Rightarrow k \approx& |\Omega| \frac{t}{s} .
+\end{align}
+I.e., the estimator for the number of satisfying assignments, $k$, divided by the large sample space, $\Omega$, is the ratio of success to samples. \\
+\\
+If we let 
+\[Z = \left\{ 
+	\begin{array}{ll}
+    	1 \text{     if a sample is a success} \\
+        0 \text{     otherwise},
+     \end{array}
+   \right.
+\]
+then we can apply a theorem to this estimation process that says that we only need \[\mathcal{O} ( \frac{\V (Z)}{\E[Z]^2} \frac{1}{\epsilon^2} \log{\frac{1}{\delta}})\] samples in order to get an estimation that has relative error $\epsilon$ of the true value of $\E[Z] = \frac{|\Omega^\prime|}{|\Omega|}$ with confidence $1- \delta$. 
+\\
+To bound this, we need an upper bound on the mean squared error. First note that \\
+\begin{align}
+\V(Z) =& \E[Z^2] - \E[Z]^2 \\
+	  \le& \E[Z^2] \\
+      \le& \E[Z].
+\end{align}
+Then, we need a lower bound on $E[Z] = \frac{|\Omega^\prime|}{|\Omega|}$:
+\begin{gather}
+|\Omega^\prime| \ge \max_{i\in \{1, ... , m\}}{2^{n -|C_i|}} \\
+|\Omega| \le m \max_{i\in \{1, ..., m\}}{2^{n - |C_i|}}. 
+\end{gather}
+So, combining the bounds, we have
+\begin{align}
+\E[Z] = \frac{|\Omega^\prime|}{|\Omega|} \ge& \frac{\max_{i\in \{1, ... , m\}}{2^{n -|C_i|}}}{m \max_{i\in \{1, ..., m\}}{2^{n - |C_i|}}} \\
+   		=& \frac{1}{m},
+\end{align}
+where $C_i$ is the number of variables in the $i$th conjunction. Thus, we have an asymptotic upper bound for the number of samples needed to ensure an relative error of $\epsilon$ with confidence $1-\delta$, given by 
+\begin{gather}
+\mathcal{O}(m \frac{1}{\epsilon^2} \log {\frac{1}{\delta}}). 
+\end{gather}
+Finally, the total number of samples we need to take to estimate $k$ is equal to the number of trials just given in $(11)$ because the estimate for $k$ is just a linear scaling of $\E[Z]$ by $|\Omega|$ and $\epsilon$ is the \textit{relative} error. 
+
+    
+    
+    
+    
+    
+    
+    
+    
+\end{document}
