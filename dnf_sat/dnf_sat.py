@@ -4,6 +4,9 @@ import numpy as np
 np.random.seed(123456789)
 
 def read_input():
+    """
+    Subroutine to read the input from stdin
+    """
     n, m = -1, -1
     dnf = np.zeros((1, 1))
     precision = -1
@@ -29,23 +32,22 @@ def read_input():
 
 def sample_choice_helper(dnf, space_size):
     num_vars = len(dnf[0])
-    num_clauses = len(dnf)
 
-    
     clause_indx = -1
-    random_choice = np.random.randint(0, space_size)  #randomly choose which state
-    while random_choice >= 0:
+    random_choice = np.random.randint(0, space_size)  #uniformly randomly choose which state
+    while random_choice >= 0:  # finding the corresponding clause
         clause_indx += 1
         clause_freedom_size = 2 ** (num_vars - np.abs(dnf[clause_indx]).sum())
         random_choice -= clause_freedom_size
 
     clause = np.copy(dnf[clause_indx])
-    random_choice += 2 ** (num_vars - np.abs(dnf[clause_indx]).sum())
+    random_choice += 2 ** (num_vars - np.abs(dnf[clause_indx]).sum())  # correcting remainder
     
     bound = np.abs(clause).sum()
     free = num_vars - bound
     
-    asbit = bin(random_choice).lstrip('-0b')
+    # interpret remainder as bit to identify choice of free variables
+    asbit = bin(random_choice).lstrip('-0b')  
     if len(asbit) < free:
         asbit += '0' * (free - len(asbit))
     choice_as_array = np.array([int(i) for i in asbit])
@@ -59,12 +61,14 @@ def sample(dnf, space_size):
     Decide if clause i is the first clause to be satisfied by sigma
     """
     
+    # generate a sample from the space with uniform probability
     clause_ind, free_choice = sample_choice_helper(dnf, space_size) 
     clause = np.copy(dnf[clause_ind])
     
     sat_choice = clause
-    sat_choice[clause == 0] = free_choice
-    for early_clause in dnf[:clause_ind]:
+    sat_choice[clause == 0] = free_choice #  filling the free variables with the random choice
+    
+    for early_clause in dnf[:clause_ind]: #  testing all clauses up to this one
         comp = early_clause * sat_choice
         sat_early_clause = not np.any(comp < 0)
         if sat_early_clause:
@@ -72,9 +76,13 @@ def sample(dnf, space_size):
     return 1
     
 def find_space_size(dnf):
+    """
+    Subroutine to go sum over each clause the dnf and find the number of
+        satisfying assignments calculated by 2^(#free variables in clause)
+    """
     n = len(dnf[0])
     helper = lambda x : 2 ** (n - np.abs(x).sum()) # num free
-    # vec_helper = np.vectorize(helper)
+
     clause_options = np.apply_along_axis(helper, 1, dnf)
     return clause_options.sum()
 
@@ -100,7 +108,7 @@ if __name__ == "__main__":
     # s = tests.sum()
     
     cumulative = 0    
-    for indx in range(0, num_samples):  # One by one test...
+    for indx in range(0, num_samples):  # One by one test samples...
         cumulative += sample(F, space_size)
         
     satisfiable_ratio = cumulative / float(num_samples)  # ratio 
