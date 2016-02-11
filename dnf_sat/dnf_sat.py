@@ -90,6 +90,7 @@ def find_space_size(dnf):
     return clause_options.sum()
 
 if __name__ == "__main__":
+
     F, epsilon, delta = read_input()  # real input
 
     # F = np.array([[1, 1, 1], [-1, -1, -1]])  # fake input 1
