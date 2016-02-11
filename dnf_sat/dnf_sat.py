@@ -1,7 +1,8 @@
 import sys
 import numpy as np
 
-np.random.seed(123456789)
+# np.random.seed(123456789)
+
 
 def read_input():
     """
@@ -14,27 +15,27 @@ def read_input():
 
     for i, line in enumerate(sys.stdin):
         if i == 0:
-            nandm = line.split(' ')
-            n = int(nandm[0])
-            m = int(nandm[1])
+            n, m = line.split(' ')
+            n = int(n)
+            m = int(m)
             dnf = np.zeros((int(m), int(n)), dtype=np.int8)
         elif i <= m:
             for word in line.split(' '):
                 j = np.abs(int(word))
                 sign = int(word) / j
                 dnf[i-1][j-1] = sign
-        elif i < m + 1:
-            precision = float(line.split(' ')[0])
+        elif i == m + 1:
+            precision = float(line)
         else:
-            error_prob = float(line.split(' ')[0])
-
+            error_prob = float(line)
     return dnf, precision, error_prob
+
 
 def sample_choice_helper(dnf, space_size):
     num_vars = len(dnf[0])
 
     clause_indx = -1
-    random_choice = np.random.randint(0, space_size)  #uniformly randomly choose which state
+    random_choice = np.random.randint(0, space_size)  # uniformly randomly choose which state
     while random_choice >= 0:  # finding the corresponding clause
         clause_indx += 1
         clause_freedom_size = 2 ** (num_vars - np.abs(dnf[clause_indx]).sum())
@@ -54,6 +55,7 @@ def sample_choice_helper(dnf, space_size):
     choice_as_array[choice_as_array == 0] = -1
     return clause_indx, choice_as_array
 
+
 def sample(dnf, space_size):
     """
     Pick random sample from sample space
@@ -66,22 +68,23 @@ def sample(dnf, space_size):
     clause = np.copy(dnf[clause_ind])
     
     sat_choice = clause
-    sat_choice[clause == 0] = free_choice #  filling the free variables with the random choice
+    sat_choice[clause == 0] = free_choice  # filling the free variables with the random choice
     
-    for early_clause in dnf[:clause_ind]: #  testing all clauses up to this one
+    for early_clause in dnf[:clause_ind]:  # testing all clauses up to this one
         comp = early_clause * sat_choice
         sat_early_clause = not np.any(comp < 0)
         if sat_early_clause:
             return 0
     return 1
-    
+
+
 def find_space_size(dnf):
     """
     Subroutine to go sum over each clause the dnf and find the number of
         satisfying assignments calculated by 2^(#free variables in clause)
     """
     n = len(dnf[0])
-    helper = lambda x : 2 ** (n - np.abs(x).sum()) # num free
+    helper = lambda x: 2 ** (n - np.abs(x).sum())  # num free
 
     clause_options = np.apply_along_axis(helper, 1, dnf)
     return clause_options.sum()
