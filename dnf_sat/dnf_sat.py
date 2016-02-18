@@ -72,7 +72,7 @@ def sample(dnf, space_size):
     
     for early_clause in dnf[:clause_ind]:  # testing all clauses up to this one
         comp = early_clause * sat_choice
-        sat_early_clause = not np.any(comp < 0)
+        sat_early_clause = not np.any(comp < 0)  # if early clause has opposite sign as choice, choice does not satisfy it
         if sat_early_clause:
             return 0
     return 1
@@ -97,24 +97,24 @@ if __name__ == "__main__":
 
     # F = np.array([[1, 0, -1], [1, 1, 0]])  # fake input 2
 
-    # F = np.array([[1, 1, 1, 1 , 0, 0, 0, 0, -1], #fake input 4
+    # F = np.array([[1, 1, 1, 1, 0, 0, 0, 1, 1], #fake input 4
     #              [-1, 1, 1, 1, -1, 1, 1, 1, 1],
-    #              [1, 1, 1, 1, 0, 0, 0, 0, 1]])
-
+    #              [1, 1, 1, 0, 0, 0, 0, 0, 1]])
+    # epsilon = 0.1
+    # delta = 0.01
     n, m = len(F), len(F[0])
-    num_samples = int(-1 * m * 1/epsilon ** 2 * np.log(delta))
     space_size = find_space_size(F)
-    
-    # tests = np.zeros(num_samples)
-    # h = lambda x: sample(F, space_size)    # batch test
-    # hvec = np.vectorize(h)                 # slower
-    # tests = hvec(tests)
-    # s = tests.sum()
-    
+
+    y_num_samples = int(m * 4/float(epsilon ** 2))
+    num_y = int(np.log(1/float(delta)))
+    y = np.zeros(num_y)
+
     cumulative = 0    
-    for indx in range(0, num_samples):  # One by one test samples...
-        cumulative += sample(F, space_size)
-        
-    satisfiable_ratio = cumulative / float(num_samples)  # ratio 
+    for i in range(len(y)):
+        for indx in range(0, y_num_samples):
+            y[i] += sample(F, space_size)
+
+    y /= float(y_num_samples)  # compute as mean
+    satisfiable_ratio = np.median(y)
 
     print satisfiable_ratio * space_size  # scale ratio by total sample space size

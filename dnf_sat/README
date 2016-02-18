@@ -12,6 +12,7 @@ Stefankovic
 
 * writeup.pdf: pdf of my writeup for this assignment 
 
+* writeup_latex: the latex file used for the writeup if for some reason you want it.
 
 ********************** How to Run ************************
 On a unix machine run
