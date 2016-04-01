@@ -5,7 +5,7 @@ from Queue import LifoQueue
 
 def read_input(file=None):
     """
-    Subroutine to read the input from stdin
+    :arg file: file object from which to read the input. If none, the it's assumed std
     """
     if file is None:
         file = sys.stdin
@@ -27,27 +27,27 @@ def read_input(file=None):
 
     points = points[mask]
     return len(points), points
-
-
-def norm(vec):
-    return np.sqrt(np.abs(vec ** 2).sum())
-
-
-def angle(pta, elbow, ptc):
-    """
-    INPUT: three 2-dimensional points
-    OUTPUT: angle between the ray from pta to elbow and the ray from elbow to ptc
-        (in radians)
-    """
-    vec1 = pta - elbow
-    vec2 = ptc - elbow
-    try:
-        dot_prod = np.dot(vec1, vec2)
-        angle = np.arccos(dot_prod / (norm(vec1) * norm(vec2)))  # inefficient?
-    except ArithmeticError:
-        sys.exit("No angle between a vector and a length-zero vector")
-
-    return angle
+#
+#
+# def norm(vec):
+#     return np.sqrt(np.abs(vec ** 2).sum())
+#
+#
+# def angle(pta, elbow, ptc):
+#     """
+#     INPUT: three 2-dimensional points
+#     OUTPUT: angle between the ray from pta to elbow and the ray from elbow to ptc
+#         (in radians)
+#     """
+#     vec1 = pta - elbow
+#     vec2 = ptc - elbow
+#     try:
+#         dot_prod = np.dot(vec1, vec2)
+#         angle = np.arccos(dot_prod / (norm(vec1) * norm(vec2)))  # inefficient?
+#     except ArithmeticError:
+#         sys.exit("No angle between a vector and a length-zero vector")
+#
+#     return angle
 
 
 def which_side(pta, ptb, test_pt):
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     convex_hull = graham_scan(points)
     print convex_hull
     import matplotlib.pyplot as plt
-    
+
     plt.scatter(points[:, 0], points[:, 1])
     convex_hull = np.vstack((convex_hull, convex_hull[0]))
     plt.plot(convex_hull[:, 0], convex_hull[:, 1])
