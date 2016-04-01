@@ -57,31 +57,34 @@ CSC 284: Advanced Algorithms\\
 Stefankovic} %if necessary, replace with your course title
 
 \maketitle
-The goal was, given a DNF formula $F$, to probabilistically calculate the number of satisfying assignments, $k$, to $F$. In this discussion, $n$ is the number of variables and $m$ is the number of clauses in the DNF formula. We perform this approximation by sampling the space $\Omega$ of all pairs $(i, \sigma)$ where $i \in  \{1, ..., m\}$ and $\sigma$ satisfies the $i$th clause. We consider a subset $\Omega ^\prime \subset \Omega$ that has the same cardinality of the set of satisfying assignments. 
+The goal was, given a DNF formula $F$, to probabilistically calculate the number of satisfying assignments, $k$, to $F$. In this discussion, $n$ is the number of variables and $m$ is the number of clauses in the DNF formula. We perform this approximation by sampling the space $\Omega$ of all pairs $(i, \sigma)$ where $i \in  \{1, ..., m\}$ and $\sigma$ is an assignment of variable values that satisfies the $i$th clause. We consider a subset $\Omega ^\prime \subset \Omega$ defined by $(i,\sigma)\in \Omega^\prime $ iff $i$ is the smallest number such that the $i$th clause is satisfied by $\sigma$. Since we have chosen just one pair $(i, \sigma)$ for each $\sigma$, $\Omega^\prime$ has the same cardinality of the set of satisfying assignments. 
 \\
 
-For each sample, we test to see if clause $i$ is the lowest number such that $\sigma$ is a satisfying assignment. If so, then we have found the unique identifier of the satisfying assignment $\sigma$. Otherwise, this sample is a part of $\Omega$ but not part of the (repetition-less) set of satisfying assignments. 
+For each sample, we test to see if clause $i$ is the lowest number such that $\sigma$ is a satisfying assignment. If so, then we have found the unique identifier of the satisfying assignment $\sigma$. Otherwise, this sample is a part of $\Omega$ but not part of $\Omega^\prime$. 
 \\
 
-We count the number of samples $t$ in $\Omega ^\prime$ and the total number of samples, $s$. Then the approximate number of assignments is 
+We count the number of samples in $\Omega ^\prime$, $t$, and the total number of samples, $s$. Then the approximate number of satisfying assignments is determined by
 \begin{align}
 \frac{t}{s} \approx& \frac{|\Omega ^\prime |}{|\Omega|} \\
 					=& \frac{k}{|\Omega|} \\
                     \Rightarrow k \approx& |\Omega| \frac{t}{s} .
 \end{align}
-I.e., the estimator for the number of satisfying assignments, $k$, divided by the large sample space, $\Omega$, is the ratio of success to samples. \\
+I.e., an estimator for the number of satisfying assignments, $k$, divided by the large sample space, $\Omega$, is the ratio of success to samples. To analyze this estimator, we consider indicator variables as follows.\\
 \\
-If we let 
-\[Z = \left\{ 
+Let 
+\[Z_i = \left\{ 
 	\begin{array}{ll}
-    	1 \text{     if a sample is a success} \\
-        0 \text{     otherwise},
+    	1 \text{     if sample $i$ is a success} \\
+        0 \text{     otherwise}.
      \end{array}
    \right.
 \]
-then we can apply a theorem to this estimation process that says that we only need \[\mathcal{O} ( \frac{\V (Z)}{\E[Z]^2} \frac{1}{\epsilon^2} \log{\frac{1}{\delta}})\] samples in order to get an estimation that has relative error $\epsilon$ of the true value of $\E[Z] = \frac{|\Omega^\prime|}{|\Omega|}$ with confidence $1- \delta$. 
+Further, let $Z = Z_i$ for an arbitrary $i$. Observe that $Z_i$ are independent and identically distributed. Then we can apply a theorem to this estimation process that says that we only need 
+\[\mathcal{O} \left( \frac{\V (Z)}{\E[Z]^2} \frac{1}{\epsilon^2} \log{\frac{1}{\delta}}\right)\] 
+samples in order to get an estimation that has relative error $\epsilon$ of the true value of $\E[Z] = \frac{|\Omega^\prime|}{|\Omega|}$ with confidence $1- \delta$ by the following method: $\log{\frac{1}{\delta}}$ times take the mean of $\frac{\V(Z)}{\E[Z]^2} \frac{4}{\epsilon^2}$ samples of $Z$. Then take the median of the means. 
 \\
-To bound this, we need an upper bound on the mean squared error. First note that \\
+
+To bound the number of samples we need, we need an upper bound on the mean squared error. First note that \\
 \begin{align}
 \V(Z) =& \E[Z^2] - \E[Z]^2 \\
 	  \le& \E[Z^2] \\
@@ -99,16 +102,28 @@ So, combining the bounds, we have
 \end{align}
 where $C_i$ is the number of variables in the $i$th conjunction. Thus, we have an asymptotic upper bound for the number of samples needed to ensure an relative error of $\epsilon$ with confidence $1-\delta$, given by 
 \begin{gather}
-\mathcal{O}(m \frac{1}{\epsilon^2} \log {\frac{1}{\delta}}). 
+\mathcal{O}\left(m \frac{1}{\epsilon^2} \log {\frac{1}{\delta}}\right). 
 \end{gather}
 Finally, the total number of samples we need to take to estimate $k$ is equal to the number of trials just given in $(11)$ because the estimate for $k$ is just a linear scaling of $\E[Z]$ by $|\Omega|$ and $\epsilon$ is the \textit{relative} error. 
+\\
+\vspace{10cm}
+\\
+\textbf{A note on my program's implementation of this procedure}:\\
+I compute precisely 
+\[m \frac{4}{\epsilon^2}\]
+samples for each "$y$", and precisely 
+\[\log {\frac{1}{\delta}}\]
+"$y$"s, rounded to the nearest integer. However, this is an asymptotic number of samples, and as a result, we may need an (unknown) constant multiple of samples to reach the desired confidence. 
 
-    
-    
-    
-    
-    
-    
-    
+Next, I assign each event in $\Omega$ with a single number in $\{0, ... , |\Omega|-1\}$ and use a random number generator to select a random such number. This gives the random choice a uniformly random distribution with respect to elements of $\Omega$. Suppose the random integer chosen is $x$. Then the assignment follows this process:
+\\
+The chosen clause $i$ is the largest $i$ such that 
+\begin{gather}
+x - \sum_{k=0}^{i}{2 ^ {n - |C_k|}} \ge 0
+\end{gather}
+Now there is a remainder $r$. Let $d = r < 2^{n-|c_i|}$. Now, $0 \le r < d$, so we can use this remainder to uniquely identify a choice of free variables in the clause. Interpreting this remainder as a bit, 
+\[r = (a_1 a_2 ... a_d)_2,\]
+we have a unique choice of assignments for the free variables in the clause determined by \[(-1)^{a_1}, (-1)^{a_2}, ..., (-1)^{a_d}.\]
+Here, $-1$ represents false, and $1$ represents true.     
     
 \end{document}
