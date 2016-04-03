@@ -24,29 +24,26 @@ def read_input(file=None):
 def get_zvalues(T):
     """
 
-    :param P: pattern (string)
-    :param T: text (string)
-    :return: indices of pattern occurrences in the text
+    :param T: Some string
+    :return Z: array of longest prefix of each substring T[i...] that is also a prefix of T[1...]
     """
     n = len(T)
     l = 0
     r = 0
     Z = np.zeros(n)
     for i in range(1, n):
-        curchar = T[i]
         j = i - l  # j is "i prime"
-        if i >= r:  # Little information about this region... set records
+        if i > r:  # Little information about this region... set records
             k = 0
             while T[k] == T[i + k]:
                 k += 1
                 if len(T) <= i + k:
                     break
-            # k -= 1
             Z[i] = k
             r = i + k
             l = i
         else:
-            if Z[j] < r - i:  # not the best so far... use previous information
+            if Z[j] <= r - i - 1:  # not the best so far... use previous information
                 Z[i] = Z[j]
             else:  # best in range -> calculate more, and set records!!
                 k = r - i
@@ -82,8 +79,9 @@ if __name__ == '__main__':
     for pattern, text in zip(patterns, texts):
         occurrences = find_occurrences(pattern, text)
         print occurrences
-        for occurrence in occurrences:
-            snippet = ''
-            for i in range(occurrence-15, occurrence + 15):
-                snippet += text[i]
-            print snippet
+        print len(occurrences)
+        # for occurrence in occurrences:
+        #     snippet = ''
+        #     for i in range(occurrence-15, occurrence + 15):
+        #         snippet += text[i]
+        #     print snippet
