@@ -129,11 +129,14 @@ if __name__ == "__main__":
         n, points = read_input()  # If no filename, will look at stdin
 
     convex_hull = graham_scan(points)
-    print convex_hull
-    import matplotlib.pyplot as plt
+    for pt in convex_hull:
+        print pt[0], pt[1],
 
-    plt.scatter(points[:, 0], points[:, 1])
-    convex_hull = np.vstack((convex_hull, convex_hull[0]))
-    plt.plot(convex_hull[:, 0], convex_hull[:, 1])
-    plt.show()
+    # print convex_hull
+    # import matplotlib.pyplot as plt
+    #
+    # plt.scatter(points[:, 0], points[:, 1])
+    # convex_hull = np.vstack((convex_hull, convex_hull[0]))
+    # plt.plot(convex_hull[:, 0], convex_hull[:, 1])
+    # plt.show()
 

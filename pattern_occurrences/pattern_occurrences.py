@@ -16,7 +16,9 @@ def read_input(file=None):
         if i % 2 == 0:
             patterns.append(string[:-1])  # don't include the newline
         else:
-            texts.append(string[:-1])  # don't include the newline
+            if string[-1] == '\n':
+                string = string[:-1]  # don't include the newline
+            texts.append(string)
 
     return patterns, texts
 
@@ -78,8 +80,11 @@ if __name__ == '__main__':
 
     for pattern, text in zip(patterns, texts):
         occurrences = find_occurrences(pattern, text)
-        print occurrences
-        print len(occurrences)
+        for o in occurrences:
+            print o,
+        print ''
+
+        # print len(occurrences)
         # for occurrence in occurrences:
         #     snippet = ''
         #     for i in range(occurrence-15, occurrence + 15):
